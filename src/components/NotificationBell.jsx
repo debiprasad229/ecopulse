@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { 
-  Bell, BellOff, Trash2, Check, CheckCheck, 
-  Award, Zap, TrendingDown, Sparkles, Info, X 
+import {
+  Bell, BellOff, Trash2, Check, CheckCheck,
+  Award, Zap, TrendingDown, Sparkles, Info, X
 } from 'lucide-react';
 
 const CATEGORY_CONFIG = {
@@ -55,7 +55,7 @@ export default function NotificationBell({
 
   return (
     <div ref={dropdownRef} style={{ position: 'relative' }}>
-      <button 
+      <button
         className={`notification-bell-btn ${dropdownOpen ? 'active' : ''}`}
         onClick={() => setDropdownOpen(!dropdownOpen)}
         aria-label={`Notifications, ${unreadCount} unread`}
@@ -77,8 +77,8 @@ export default function NotificationBell({
               )}
             </div>
             {unreadCount > 0 && (
-              <button 
-                className="mark-all-read-btn" 
+              <button
+                className="mark-all-read-btn"
                 onClick={markAllAsRead}
               >
                 <CheckCheck size={14} />
@@ -112,17 +112,17 @@ export default function NotificationBell({
                     </div>
                     <div className="category-group-list">
                       {categoryNotifs.map(notif => (
-                        <div 
-                          key={notif.id} 
+                        <div
+                          key={notif.id}
                           className={`notification-item ${notif.read ? 'read' : 'unread'}`}
                         >
-                          <div 
-                            className="notif-icon-wrapper" 
+                          <div
+                            className="notif-icon-wrapper"
                             style={{ color: config.color, background: config.bg }}
                           >
                             <IconComponent size={14} />
                           </div>
-                          
+
                           <div className="notif-content">
                             <div className="notif-title-row">
                               <h4 className="notif-item-title">{notif.title}</h4>
@@ -133,16 +133,16 @@ export default function NotificationBell({
 
                           <div className="notif-actions">
                             {!notif.read && (
-                              <button 
-                                className="notif-action-btn mark-read" 
+                              <button
+                                className="notif-action-btn mark-read"
                                 onClick={() => markAsRead(notif.id)}
                                 title="Mark as read"
                               >
                                 <Check size={14} />
                               </button>
                             )}
-                            <button 
-                              className="notif-action-btn clear-notif" 
+                            <button
+                              className="notif-action-btn clear-notif"
                               onClick={() => clearNotification(notif.id)}
                               title="Clear notification"
                             >
@@ -160,8 +160,8 @@ export default function NotificationBell({
 
           {notifications.length > 0 && (
             <div className="dropdown-footer">
-              <button 
-                className="clear-all-btn" 
+              <button
+                className="clear-all-btn"
                 onClick={clearAllNotifications}
               >
                 <Trash2 size={13} />

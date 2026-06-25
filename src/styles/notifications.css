@@ -92,6 +92,7 @@
     opacity: 0;
     transform: scale(0.95) translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -159,13 +160,16 @@
 .dropdown-body::-webkit-scrollbar {
   width: 5px;
 }
+
 .dropdown-body::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .dropdown-body::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
 }
+
 .dropdown-body::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.1);
 }
@@ -405,15 +409,51 @@
   border-color: rgba(239, 68, 68, 0.2);
 }
 
-/* Responsive Dropdown sizing on Mobile */
+/* Responsive Dropdown — Tablet (header starts to stack) */
+@media (max-width: 768px) and (min-width: 481px) {
+  .notifications-dropdown {
+    position: fixed;
+    /* Desktop header height is ~62px; on tablet the right-side items
+       may wrap slightly, so give a safe 70px offset */
+    top: 70px;
+    right: 12px;
+    left: auto;
+    width: min(360px, calc(100vw - 24px));
+    max-height: 75vh;
+    z-index: 1100;
+  }
+
+  .animate-dropdown {
+    transform-origin: top right;
+  }
+}
+
+/* Responsive Dropdown — Mobile (header stacks into two rows ~115px tall) */
 @media (max-width: 480px) {
   .notifications-dropdown {
     position: fixed;
-    top: 60px;
+    top: 120px; /* clears the two-row stacked header */
     left: 10px;
     right: 10px;
     width: auto;
-    max-height: 80vh;
+    max-height: 72vh;
+    z-index: 1100;
+  }
+
+  .animate-dropdown {
+    transform-origin: top center;
+    animation: dropdownFadeInMobile 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+
+@keyframes dropdownFadeInMobile {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
