@@ -1,7 +1,12 @@
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const uri = "mongodb://debi18348_db_user:h8bLThWwUHNKfOtV@ac-jz55szz-shard-00-00.lq0rwsq.mongodb.net:27017,ac-jz55szz-shard-00-01.lq0rwsq.mongodb.net:27017,ac-jz55szz-shard-00-02.lq0rwsq.mongodb.net:27017/ecopulse?ssl=true&authSource=admin&retryWrites=true&w=majority";
-
+const uri = process.env.MONGODB_URI;
+if (!uri) {
+  console.error("ERROR: MONGODB_URI not found in .env file.");
+  process.exit(1);
+}
 console.log("Attempting to connect to MongoDB Atlas...");
 mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 })
   .then(() => {

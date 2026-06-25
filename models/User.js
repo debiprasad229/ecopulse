@@ -1,5 +1,17 @@
 import mongoose from 'mongoose';
 
+const inputsSchema = new mongoose.Schema({
+  commuteDistance: { type: Number, default: 0 },
+  transportType: { type: String, default: 'none' },
+  flightHours: { type: Number, default: 0 },
+  electricityKwh: { type: Number, default: 0 },
+  greenEnergyShare: { type: Number, default: 0 },
+  heatingSource: { type: String, default: 'none' },
+  dietType: { type: String, default: 'lowMeat' },
+  shoppingHabit: { type: String, default: 'average' },
+  recycles: { type: Boolean, default: false }
+}, { _id: false });
+
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -29,15 +41,8 @@ const userSchema = new mongoose.Schema({
 
   // Carbon Assessments Questionnaire Inputs
   inputs: {
-    commuteDistance: { type: Number, default: 0 },
-    transportType: { type: String, default: 'none' },
-    flightHours: { type: Number, default: 0 },
-    electricityKwh: { type: Number, default: 0 },
-    greenEnergyShare: { type: Number, default: 0 },
-    heatingSource: { type: String, default: 'none' },
-    dietType: { type: String, default: 'lowMeat' },
-    shoppingHabit: { type: String, default: 'average' },
-    recycles: { type: Boolean, default: false }
+    type: inputsSchema,
+    default: null
   },
 
   // Gamification Parameters

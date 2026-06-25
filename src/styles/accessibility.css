@@ -1,0 +1,118 @@
+/* ==========================================================================
+   Accessibility Adjustments (High Contrast, Large Fonts, Reduced Motion)
+   ========================================================================== */
+
+/* High Contrast Mode styling overrides */
+body.high-contrast {
+  --bg-primary: #000000 !important;
+  --bg-secondary: #000000 !important;
+  --bg-dark: #000000 !important;
+  --bg-light: #000000 !important;
+  --card-bg: #000000 !important;
+  --card-border: #ffffff !important;
+  --text-primary: #ffffff !important;
+  --text-secondary: #ffff00 !important; /* High contrast yellow */
+  --text-muted: #ffffff !important;
+  --accent-green: #00ff00 !important;
+  --accent-blue: #00ffff !important;
+  --accent-purple: #ff00ff !important;
+  --accent-orange: #ffaa00 !important;
+  --danger: #ff0000 !important;
+  --success: #00ff00 !important;
+  background-image: none !important;
+}
+
+body.high-contrast .bento-card,
+body.high-contrast .modal-content,
+body.high-contrast .wizard-footer,
+body.high-contrast .modal-wizard-header,
+body.high-contrast .accessibility-dropdown,
+body.high-contrast .notifications-dropdown {
+  border: 2px solid #ffffff !important;
+  background-color: #000000 !important;
+  box-shadow: none !important;
+}
+
+body.high-contrast button,
+body.high-contrast select,
+body.high-contrast input {
+  border: 1.5px solid #ffffff !important;
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+body.high-contrast button.active,
+body.high-contrast button.btn-primary {
+  background: #ffff00 !important;
+  color: #000000 !important;
+  font-weight: bold !important;
+  border: 2px solid #ffffff !important;
+}
+
+body.high-contrast svg {
+  stroke-width: 2.5px !important;
+}
+
+body.high-contrast .donut-segment {
+  stroke-width: 12 !important;
+}
+
+/* Adjustable Font Sizes */
+body.accessibility-font-large {
+  font-size: 18px !important;
+}
+
+body.accessibility-font-large .card-title,
+body.accessibility-font-large h1,
+body.accessibility-font-large h2,
+body.accessibility-font-large h3 {
+  font-size: 1.25rem !important;
+}
+
+body.accessibility-font-large p,
+body.accessibility-font-large span,
+body.accessibility-font-large label,
+body.accessibility-font-large button,
+body.accessibility-font-large input,
+body.accessibility-font-large select,
+body.accessibility-font-large .habit-title,
+body.accessibility-font-large .habit-desc,
+body.accessibility-font-large .challenge-item-title {
+  font-size: 0.95rem !important;
+}
+
+body.accessibility-font-xlarge {
+  font-size: 20px !important;
+}
+
+body.accessibility-font-xlarge .card-title,
+body.accessibility-font-xlarge h1,
+body.accessibility-font-xlarge h2,
+body.accessibility-font-xlarge h3 {
+  font-size: 1.4rem !important;
+}
+
+body.accessibility-font-xlarge p,
+body.accessibility-font-xlarge span,
+body.accessibility-font-xlarge label,
+body.accessibility-font-xlarge button,
+body.accessibility-font-xlarge input,
+body.accessibility-font-xlarge select,
+body.accessibility-font-xlarge .habit-title,
+body.accessibility-font-xlarge .habit-desc,
+body.accessibility-font-xlarge .challenge-item-title {
+  font-size: 1.05rem !important;
+}
+
+/* Reduced Motion Overrides */
+body.reduced-motion *,
+body.reduced-motion *::before,
+body.reduced-motion *::after {
+  animation-delay: -1ms !important;
+  animation-duration: 1ms !important;
+  animation-iteration-count: 1 !important;
+  background-attachment: scroll !important;
+  scroll-behavior: auto !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}

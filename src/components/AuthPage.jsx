@@ -104,11 +104,7 @@ export default function AuthPage({ onAuthSuccess }) {
       }
 
       setMessage(data.message);
-      // For testing convenience, we auto-populate the token if present in debug output
-      if (data.debugToken) {
-        console.log("Debug Token received:", data.debugToken);
-        setResetToken(data.debugToken);
-      }
+      setResetToken(''); // Require user to input manually
       setResetStep(2);
     } catch (err) {
       setError(err.message);
@@ -127,7 +123,7 @@ export default function AuthPage({ onAuthSuccess }) {
       const res = await fetch('/api/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: resetToken, newPassword })
+        body: JSON.stringify({ email: forgotEmail, token: resetToken, newPassword })
       });
 
       const data = await res.json();
@@ -238,7 +234,7 @@ export default function AuthPage({ onAuthSuccess }) {
                 style={{ width: '100%', justifyContent: 'center', height: '46px' }}
                 disabled={loading}
               >
-                {loading ? 'Sending Request...' : 'Generate Reset Token'}
+                {loading ? 'Sending Request...' : 'Send Reset Code'}
               </button>
 
               <button
@@ -262,14 +258,14 @@ export default function AuthPage({ onAuthSuccess }) {
           ) : (
             <form onSubmit={handleResetPassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div className="form-group" style={{ marginBottom: '8px' }}>
-                <label className="form-label" htmlFor="reset-token">Reset Token</label>
+                <label className="form-label" htmlFor="reset-token">6-Digit Reset Code</label>
                 <div style={{ position: 'relative' }}>
                   <input
                     id="reset-token"
                     type="text"
                     className="ai-chat-input"
                     style={{ paddingLeft: '40px', width: '100%', height: '46px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--card-border)', borderRadius: 'var(--border-radius-md)', color: 'var(--text-primary)' }}
-                    placeholder="Enter received reset token"
+                    placeholder="Enter 6-digit reset code"
                     value={resetToken}
                     onChange={(e) => setResetToken(e.target.value)}
                     required
@@ -277,7 +273,7 @@ export default function AuthPage({ onAuthSuccess }) {
                   <Key size={16} style={{ position: 'absolute', left: '14px', top: '15px', color: 'var(--text-muted)' }} />
                 </div>
                 <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
-                  * The test token was also logged to the Node.js server console.
+                  * The reset code was logged to the Node.js server console.
                 </span>
               </div>
 

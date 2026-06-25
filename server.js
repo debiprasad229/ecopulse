@@ -18,7 +18,11 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 8080;
-const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_ecopulse_jwt_key_2026_change_me';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error('CRITICAL ERROR: JWT_SECRET environment variable is not configured.');
+  process.exit(1);
+}
 
 // Connect to MongoDB
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/ecopulse';
@@ -154,20 +158,23 @@ app.post('/api/auth/forgot-password', async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) {
       // Obfuscated success response
-      return res.json({ message: 'If that email exists in our system, a reset token has been generated.' });
+      return res.json({ message: 'If that email exists in our system, a reset code has been sent.' });
     }
 
-    const resetToken = crypto.randomBytes(20).toString('hex');
-    user.resetPasswordToken = resetToken;
+    // Generate a 6-digit verification code
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    user.resetPasswordToken = resetCode;
     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
 
     await user.save();
 
-    console.log(`[FORGOT PASSWORD] Reset token for ${email}: ${resetToken}`);
+    console.log('\n==================================================');
+    console.log(`RESET CODE EMAIL SENT TO: ${email}`);
+    console.log(`Your EcoPulse password reset code is: ${resetCode}`);
+    console.log('==================================================\n');
 
     res.json({
-      message: 'If that email exists in our system, a reset token has been generated.',
-      debugToken: resetToken // Return for demo and testing convenience
+      message: 'If that email exists in our system, a reset code has been sent.'
     });
   } catch (error) {
     console.error('Forgot Password Error:', error);
@@ -178,18 +185,19 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 // Reset Password Route
 app.post('/api/auth/reset-password', async (req, res) => {
   try {
-    const { token, newPassword } = req.body;
-    if (!token || !newPassword) {
-      return res.status(400).json({ error: 'Token and new password are required.' });
+    const { email, token, newPassword } = req.body;
+    if (!email || !token || !newPassword) {
+      return res.status(400).json({ error: 'Email, reset code, and new password are required.' });
     }
 
     const user = await User.findOne({
+      email,
       resetPasswordToken: token,
       resetPasswordExpires: { $gt: Date.now() }
     });
 
     if (!user) {
-      return res.status(400).json({ error: 'Invalid or expired password reset token.' });
+      return res.status(400).json({ error: 'Invalid or expired password reset code.' });
     }
 
     const salt = await bcrypt.genSalt(10);
