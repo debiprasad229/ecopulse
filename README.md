@@ -163,11 +163,6 @@ gcloud run deploy ecopulse \
 
 **Live Demo:** [https://ecopulse-802996668281.asia-south2.run.app](https://ecopulse-802996668281.asia-south2.run.app)
 
-### Demo Account
-To try out the application without registering, you can use the default test account:
-- **Email:** `gamersom321@gmail.com`
-- **Password:** `admin123456`
-
 ## 🔒 Security Features
 * **Authentication & Authorization**: Password hashing using `bcryptjs` and user session tokens signed with `jsonwebtoken` (JWT).
 * **Protected Routes**: Middleware verifies authentication tokens on all user-specific profile, habit, and chat routes.
