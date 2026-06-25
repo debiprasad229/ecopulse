@@ -67,7 +67,7 @@ export default function ChartCard({ id, categories = { transport: 0, energy: 0, 
             No emissions calculated. Please complete onboarding.
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '10px 0' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '10px 0', width: '100%' }}>
             
             {/* SVG Donut Chart */}
             <div className="chart-container">

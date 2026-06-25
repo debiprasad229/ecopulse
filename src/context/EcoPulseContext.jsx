@@ -133,6 +133,14 @@ export function EcoPulseProvider({ children }) {
 
   const [showWizard, setShowWizard] = useState(false);
 
+  const [isNewUser, setIsNewUser] = useState(() => {
+    try {
+      return localStorage.getItem('ecopulse_is_new_user') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
   const [habitSavings, setHabitSavings] = useState(() => {
     try {
       const stored = localStorage.getItem('ecopulse_habits');
@@ -217,6 +225,7 @@ export function EcoPulseProvider({ children }) {
     try {
       localStorage.removeItem('ecopulse_token');
       localStorage.removeItem('ecopulse_user');
+      localStorage.removeItem('ecopulse_is_new_user');
     } catch (e) {
       console.error(e);
     }
@@ -231,6 +240,7 @@ export function EcoPulseProvider({ children }) {
     setNotifications(SEED_NOTIFICATIONS);
     setChatHistory([]);
     setHabitSavings(0);
+    setIsNewUser(false);
     setIsHydrated(false);
   };
 
@@ -257,7 +267,26 @@ export function EcoPulseProvider({ children }) {
 
         const data = await res.json();
         
-        if (data.inputs !== undefined) setInputs(data.inputs);
+        if (data.isNewUser !== undefined) {
+          setIsNewUser(data.isNewUser);
+        }
+        
+        if (data.isNewUser === false && !data.inputs) {
+          const defaultInputs = {
+            commuteDistance: 0,
+            transportType: 'none',
+            flightHours: 0,
+            electricityKwh: 0,
+            greenEnergyShare: 0,
+            heatingSource: 'none',
+            dietType: 'lowMeat',
+            shoppingHabit: 'average',
+            recycles: false
+          };
+          setInputs(defaultInputs);
+        } else if (data.inputs !== undefined) {
+          setInputs(data.inputs);
+        }
         if (data.xp !== undefined) setXp(data.xp);
         if (data.completedHabits !== undefined) {
           setCompletedHabits(data.completedHabits || {});
@@ -312,6 +341,7 @@ export function EcoPulseProvider({ children }) {
             history,
             chatHistory,
             notifications,
+            isNewUser,
             settings: {
               highContrast,
               fontSize,
@@ -325,7 +355,7 @@ export function EcoPulseProvider({ children }) {
     }, 1000); // 1-second debounce to batch rapid updates
 
     return () => clearTimeout(delayDebounce);
-  }, [inputs, xp, completedHabits, challengeStats, offsets, history, chatHistory, notifications, highContrast, fontSize, reducedMotion, token, isHydrated]);
+  }, [inputs, xp, completedHabits, challengeStats, offsets, history, chatHistory, notifications, highContrast, fontSize, reducedMotion, token, isHydrated, isNewUser]);
 
   // Route hashchange listener
   useEffect(() => {
@@ -462,6 +492,14 @@ export function EcoPulseProvider({ children }) {
 
   useEffect(() => {
     try {
+      localStorage.setItem('ecopulse_is_new_user', isNewUser);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [isNewUser]);
+
+  useEffect(() => {
+    try {
       localStorage.setItem('ecopulse_habits', JSON.stringify(completedHabits));
     } catch (e) {
       console.error(e);
@@ -481,6 +519,7 @@ export function EcoPulseProvider({ children }) {
       localStorage.setItem('ecopulse_inputs', JSON.stringify(newInputs));
       setInputs(newInputs);
       setShowWizard(false);
+      setIsNewUser(false);
 
       const breakdown = calculateFootprint(newInputs);
       const totalFootprint = breakdown.total;
@@ -516,6 +555,7 @@ export function EcoPulseProvider({ children }) {
       localStorage.removeItem('ecopulse_challenge_stats');
       localStorage.removeItem('ecopulse_offsets');
       localStorage.removeItem('ecopulse_xp');
+      localStorage.removeItem('ecopulse_is_new_user');
       setInputs(null);
       setHistory([]);
       setCompletedHabits({});
@@ -523,6 +563,7 @@ export function EcoPulseProvider({ children }) {
       setOffsets({ treesPlanted: 0, cleanEnergyFund: 0, plasticRemoved: 0 });
       setXp(0);
       setShowWizard(false);
+      setIsNewUser(true);
     } catch (e) {
       console.error("Failed to go to welcome screen:", e);
     }
@@ -590,6 +631,8 @@ export function EcoPulseProvider({ children }) {
     history,
     showWizard,
     setShowWizard,
+    isNewUser,
+    setIsNewUser,
     habitSavings,
     setHabitSavings,
     isMobileMenuOpen,

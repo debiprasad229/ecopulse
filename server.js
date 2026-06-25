@@ -91,7 +91,8 @@ app.post('/api/auth/signup', async (req, res) => {
     const newUser = new User({
       name,
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      isNewUser: true
     });
 
     await newUser.save();
@@ -248,7 +249,8 @@ app.put('/api/user/profile', authenticateToken, async (req, res) => {
       offsets, 
       history, 
       chatHistory, 
-      notifications 
+      notifications,
+      isNewUser
     } = req.body;
 
     if (settings !== undefined) user.settings = settings;
@@ -261,6 +263,7 @@ app.put('/api/user/profile', authenticateToken, async (req, res) => {
     if (history !== undefined) user.history = history;
     if (chatHistory !== undefined) user.chatHistory = chatHistory;
     if (notifications !== undefined) user.notifications = notifications;
+    if (isNewUser !== undefined) user.isNewUser = isNewUser;
 
     await user.save();
 

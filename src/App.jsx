@@ -4,6 +4,7 @@ import OnboardingWizard from './components/OnboardingWizard';
 import AccessibilitySettings from './components/AccessibilitySettings';
 import AuthPage from './components/AuthPage';
 import Navbar from './components/Navbar';
+import NotificationBell from './components/NotificationBell';
 
 // Page Components
 import Dashboard from './pages/Dashboard';
@@ -27,6 +28,7 @@ function AppContent() {
     xp,
     showWizard,
     setShowWizard,
+    isNewUser,
     isMobileMenuOpen,
     setIsMobileMenuOpen,
     notifications,
@@ -53,7 +55,7 @@ function AppContent() {
       
       <header className="app-header">
         <div className="brand-group" style={{ gap: '8px' }}>
-          {inputs && token && (
+          {inputs && !isNewUser && token && (
             <button 
               className="mobile-menu-btn" 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
@@ -70,6 +72,15 @@ function AppContent() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          {inputs && !isNewUser && token && (
+            <NotificationBell 
+              notifications={notifications}
+              markAsRead={markAsRead}
+              markAllAsRead={markAllAsRead}
+              clearNotification={clearNotification}
+              clearAllNotifications={clearAllNotifications}
+            />
+          )}
           <AccessibilitySettings 
             highContrast={highContrast}
             setHighContrast={setHighContrast}
@@ -79,7 +90,7 @@ function AppContent() {
             setReducedMotion={setReducedMotion}
           />
 
-          {inputs && token && (
+          {inputs && !isNewUser && token && (
             <button 
               type="button"
               className="btn btn-secondary" 
@@ -91,7 +102,7 @@ function AppContent() {
             </button>
           )}
 
-          {inputs && token && (
+          {inputs && !isNewUser && token && (
             <div className="user-badge-header">
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Level:</span>
               <span className="xp-indicator">{Math.floor(xp / 100) + 1}</span>
@@ -126,7 +137,7 @@ function AppContent() {
         </main>
       ) : (
         <>
-          {inputs && (
+          {inputs && !isNewUser && (
             <Navbar 
               isOpen={isMobileMenuOpen} 
               setIsOpen={setIsMobileMenuOpen} 
@@ -140,7 +151,7 @@ function AppContent() {
           )}
 
           <main style={{ flex: '1', display: 'flex', alignItems: 'center', padding: '20px 0 60px' }}>
-            {inputs ? (
+            {inputs && !isNewUser ? (
               isPageLoading ? (
                 <PageLoader />
               ) : (

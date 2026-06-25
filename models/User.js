@@ -39,6 +39,12 @@ const userSchema = new mongoose.Schema({
     reducedMotion: { type: Boolean, default: false }
   },
 
+  // Account Type
+  isNewUser: {
+    type: Boolean,
+    default: false
+  },
+
   // Carbon Assessments Questionnaire Inputs
   inputs: {
     type: inputsSchema,
