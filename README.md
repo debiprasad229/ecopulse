@@ -8,7 +8,7 @@ In the fight against climate change, awareness is the first step. However, calcu
 
 ## ✨ Features
 * **Smart Carbon Scanner**: Upload electricity bills, fuel receipts, or shopping invoices via drag-and-drop. The Gemini Multimodal API extracts text and calculates your carbon footprint automatically, with a local regex-based fallback for text-only files.
-* **Complete User Authentication**: Secure Register, Login, Forgot Password, and Reset Password flows with bcryptjs password hashing and JWT sessions.
+* **Complete User Authentication**: Secure Register, Login, and a 3-step Forgot Password/Reset Password wizard (Email verification, 6-digit Code verification, Password reset) with bcryptjs password hashing, JWT sessions, and real Gmail SMTP email delivery.
 * **Persistent Progress Tracking**: Real-time state hydration with MongoDB to persist carbon history, streaks, logged habits, and AI chat logs across devices.
 * **Interactive Dashboard**: View real-time carbon metrics across multiple bento-grid cards.
 * **EcoPulse AI Chat**: An in-app AI assistant powered by Gemini for personalized eco-advice with chat history persistence.
@@ -76,6 +76,7 @@ The Express server acts as a **secure backend proxy and API gateway**:
 | **Styling** | Vanilla CSS (Glassmorphism, Dark Mode) |
 | **Icons** | Lucide React |
 | **AI** | Google Gemini 2.5 Flash (Multimodal API) |
+| **Email Delivery** | Nodemailer (Gmail SMTP integration) |
 | **Security** | express-rate-limit, CORS whitelist, dotenv |
 | **Animations** | canvas-confetti |
 | **Testing** | Vitest, React Testing Library, jsdom |
@@ -106,6 +107,12 @@ Create a `.env` file in the root directory:
 VITE_GEMINI_API_KEY=your_gemini_api_key_here
 MONGODB_URI=mongodb://your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret_key
+
+# SMTP Configuration (For Gmail SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-16-character-app-password
 ```
 > **Note:** Although the API key is prefixed with `VITE_`, it is only read by the **server-side** Express proxy (`server.js`) and is never bundled into the client. The `VITE_` prefix is retained for backwards compatibility.
 
@@ -158,7 +165,7 @@ gcloud run deploy ecopulse \
   --region asia-south2 \
   --project YOUR_PROJECT_ID \
   --allow-unauthenticated \
-  --set-env-vars "^;^MONGODB_URI=your_mongodb_connection_string;VITE_GEMINI_API_KEY=your_gemini_key;JWT_SECRET=your_jwt_secret"
+  --set-env-vars "^;^MONGODB_URI=your_mongodb_connection_string;VITE_GEMINI_API_KEY=your_gemini_key;JWT_SECRET=your_jwt_secret;SMTP_HOST=smtp.gmail.com;SMTP_PORT=465;SMTP_USER=your_email@gmail.com;SMTP_PASS=your_app_password"
 ```
 
 **Live Demo:** [https://ecopulse-802996668281.asia-south2.run.app](https://ecopulse-802996668281.asia-south2.run.app)
@@ -167,7 +174,7 @@ gcloud run deploy ecopulse \
 * **Authentication & Authorization**: Password hashing using `bcryptjs` and user session tokens signed with `jsonwebtoken` (JWT).
 * **Protected Routes**: Middleware verifies authentication tokens on all user-specific profile, habit, and chat routes.
 * **API Key Protection**: Sensitive API keys and database credentials live exclusively on the server, never exposed in client bundles.
-* **Rate Limiting**: All `/api/*` routes are rate-limited using `express-rate-limit` to prevent denial-of-service and brute-force attacks.
+* **Rate Limiting**: All `/api/*` routes are rate-limited to 100 requests per 15 minutes, with a strict **3 requests per 15 minutes limit** on the `/api/auth/forgot-password` endpoint to prevent email spamming.
 * **CORS Whitelist**: Restricts API calls to approved origins (the production URL and `localhost:5173`).
 * **Payload Constraints**: JSON request sizes are capped at `10mb`.
 

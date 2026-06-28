@@ -16,7 +16,8 @@ export default function AuthPage({ onAuthSuccess }) {
   const [forgotEmail, setForgotEmail] = useState('');
   const [resetToken, setResetToken] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [resetStep, setResetStep] = useState(1); // 1 = request token, 2 = reset password with token
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [resetStep, setResetStep] = useState(1); // 1 = request token, 2 = verify code, 3 = reset password
 
   // Status states
   const [loading, setLoading] = useState(false);
@@ -113,10 +114,43 @@ export default function AuthPage({ onAuthSuccess }) {
     }
   };
 
+  const handleVerifyCode = async (e) => {
+    e.preventDefault();
+    setError('');
+    setMessage('');
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/auth/verify-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotEmail, token: resetToken })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Verification failed.');
+      }
+
+      setMessage(data.message);
+      setResetStep(3);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setError('');
     setMessage('');
+
+    if (newPassword !== confirmNewPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -137,6 +171,7 @@ export default function AuthPage({ onAuthSuccess }) {
       setForgotEmail('');
       setResetToken('');
       setNewPassword('');
+      setConfirmNewPassword('');
       setActiveTab('login');
     } catch (err) {
       setError(err.message);
@@ -234,7 +269,7 @@ export default function AuthPage({ onAuthSuccess }) {
                 style={{ width: '100%', justifyContent: 'center', height: '46px' }}
                 disabled={loading}
               >
-                {loading ? 'Sending Request...' : 'Send Reset Code'}
+                {loading ? 'Sending Request...' : 'Continue'}
               </button>
 
               <button
@@ -255,8 +290,11 @@ export default function AuthPage({ onAuthSuccess }) {
                 Back to Login
               </button>
             </form>
-          ) : (
-            <form onSubmit={handleResetPassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          ) : resetStep === 2 ? (
+            <form onSubmit={handleVerifyCode} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '8px', lineHeight: '1.5' }}>
+                A 6-digit verification code has been sent to <strong>{forgotEmail}</strong>. Please enter it below.
+              </div>
               <div className="form-group" style={{ marginBottom: '8px' }}>
                 <label className="form-label" htmlFor="reset-token">6-Digit Reset Code</label>
                 <div style={{ position: 'relative' }}>
@@ -277,6 +315,35 @@ export default function AuthPage({ onAuthSuccess }) {
                 </span>
               </div>
 
+              <button
+                type="submit"
+                className="btn btn-primary"
+                style={{ width: '100%', justifyContent: 'center', height: '46px' }}
+                disabled={loading}
+              >
+                {loading ? 'Verifying Code...' : 'Verify Code'}
+              </button>
+
+              <button
+                type="button"
+                className="btn-secondary"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-secondary)',
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                  textAlign: 'center',
+                  alignSelf: 'center',
+                  marginTop: '10px'
+                }}
+                onClick={() => setResetStep(1)}
+              >
+                Back to Email
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleResetPassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div className="form-group" style={{ marginBottom: '8px' }}>
                 <label className="form-label" htmlFor="new-password">New Password</label>
                 <div style={{ position: 'relative' }}>
@@ -288,6 +355,23 @@ export default function AuthPage({ onAuthSuccess }) {
                     placeholder="••••••••"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                  />
+                  <Lock size={16} style={{ position: 'absolute', left: '14px', top: '15px', color: 'var(--text-muted)' }} />
+                </div>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '8px' }}>
+                <label className="form-label" htmlFor="confirm-new-password">Confirm New Password</label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    id="confirm-new-password"
+                    type="password"
+                    className="ai-chat-input"
+                    style={{ paddingLeft: '40px', width: '100%', height: '46px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--card-border)', borderRadius: 'var(--border-radius-md)', color: 'var(--text-primary)' }}
+                    placeholder="••••••••"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
                     required
                   />
                   <Lock size={16} style={{ position: 'absolute', left: '14px', top: '15px', color: 'var(--text-muted)' }} />
