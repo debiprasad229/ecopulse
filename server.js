@@ -38,6 +38,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.set('trust proxy', 1); // Trust first proxy (Google Cloud Run load balancer) for express-rate-limit IP tracking
 const PORT = process.env.PORT || 8080;
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
