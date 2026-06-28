@@ -68,7 +68,7 @@ export default function NotificationBell({
       </button>
 
       {dropdownOpen && (
-        <div className="notifications-dropdown animate-dropdown" style={{ top: '120%' }}>
+        <div className="notifications-dropdown animate-dropdown">
           <div className="dropdown-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <h3 className="dropdown-title">Notifications</h3>

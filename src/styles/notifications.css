@@ -409,6 +409,14 @@
   border-color: rgba(239, 68, 68, 0.2);
 }
 
+@media (max-width: 768px) {
+  .notification-bell-btn:hover,
+  .notification-bell-btn.active,
+  .notification-bell-btn:active {
+    transform: none !important;
+  }
+}
+
 /* Responsive Dropdown — Tablet (header starts to stack) */
 @media (max-width: 768px) and (min-width: 481px) {
   .notifications-dropdown {
