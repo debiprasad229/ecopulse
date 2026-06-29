@@ -141,11 +141,6 @@ function AppContent() {
             <Navbar 
               isOpen={isMobileMenuOpen} 
               setIsOpen={setIsMobileMenuOpen} 
-              notifications={notifications}
-              markAsRead={markAsRead}
-              markAllAsRead={markAllAsRead}
-              clearNotification={clearNotification}
-              clearAllNotifications={clearAllNotifications}
               currentRoute={currentRoute}
             />
           )}
@@ -240,7 +235,7 @@ function AppContent() {
           marginTop: 'auto'
         }}
       >
-        <span>© {new Date().getFullYear()} EcoPulse Carbon Platform. Built for Virtual PromptWars.</span>
+        <span>© {new Date().getFullYear()} EcoPulse Carbon Platform. Created by Debi Prasad ✨</span>
       </footer>
 
     </div>

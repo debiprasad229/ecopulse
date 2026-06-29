@@ -20,7 +20,8 @@ In the fight against climate change, awareness is the first step. However, calcu
 * **Carbon Personality Card**: Discover your environmental archetype based on your habits.
 * **EcoSphere Visualization**: An interactive 3D-style globe visualization of your carbon footprint.
 * **Accessibility Settings**: Built-in accessibility options for a more inclusive experience.
-* **Premium UI/UX**: Glassmorphism, micro-animations, and a dark-mode design system built with Vanilla CSS.
+* **Interactive Notification Center**: A responsive dropdown panel tracking achievements, AI recommendations, and system updates, fully accessible on both desktop and mobile viewports.
+* **Premium UI/UX**: Glassmorphism, micro-animations (like animated navbar underlines), sticky headers, and a dark-mode design system built with Vanilla CSS, fully optimized for mobile responsiveness.
 
 ## 📸 Screenshots
 
@@ -208,11 +209,14 @@ ecopulse/
 │   │   ├── EcoSphere.jsx
 │   │   ├── HabitTrackerCard.jsx
 │   │   ├── Navbar.jsx
+│   │   ├── NotificationBell.jsx
 │   │   ├── OffsetSimulatorCard.jsx
 │   │   ├── OnboardingWizard.jsx
 │   │   └── RecommendationsCard.jsx
 │   ├── utils/            # Carbon calculations, scanner engine, etc.
 │   ├── __tests__/        # Integration & unit tests
+│   │   ├── App.test.jsx
+│   │   ├── NotificationBell.test.jsx
 │   ├── App.jsx           # Main application dashboard & routing
 │   ├── index.css         # Global design system
 │   └── main.jsx

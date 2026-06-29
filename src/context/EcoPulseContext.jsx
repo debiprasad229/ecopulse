@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useMemo, useRef } from 'react';
 import { calculateFootprint, calculateOffsets, getRecommendations } from '../utils/carbonCalculations';
 import { calculatePersonality } from '../utils/personalityEngine';
@@ -5,7 +6,7 @@ import { generateForecast } from '../utils/forecastEngine';
 
 const EcoPulseContext = createContext(null);
 
-export const HABIT_SAVINGS_MAP = {
+const HABIT_SAVINGS_MAP = {
   commute_green: 520,
   eat_vegan_veg: 600,
   unplug_unused: 120,
@@ -13,7 +14,7 @@ export const HABIT_SAVINGS_MAP = {
   cold_shower: 180
 };
 
-export const SEED_NOTIFICATIONS = [
+const SEED_NOTIFICATIONS = [
   {
     id: 'seed-1',
     category: 'AI Recommendations',
