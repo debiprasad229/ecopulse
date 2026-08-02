@@ -169,7 +169,7 @@ gcloud run deploy ecopulse \
   --set-env-vars "^;^MONGODB_URI=your_mongodb_connection_string;VITE_GEMINI_API_KEY=your_gemini_key;JWT_SECRET=your_jwt_secret;SMTP_HOST=smtp.gmail.com;SMTP_PORT=465;SMTP_USER=your_email@gmail.com;SMTP_PASS=your_app_password"
 ```
 
-**Live Demo:** [https://ecopulse-802996668281.asia-south2.run.app](https://ecopulse-802996668281.asia-south2.run.app)
+**Live Demo:** [https://ecopulse-ee0s.onrender.com](https://ecopulse-ee0s.onrender.com)
 
 ## 🔒 Security Features
 * **Authentication & Authorization**: Password hashing using `bcryptjs` and user session tokens signed with `jsonwebtoken` (JWT).
