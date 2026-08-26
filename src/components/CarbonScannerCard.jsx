@@ -95,7 +95,7 @@ export default function CarbonScannerCard({ id, inputs, onUpdateInputs, token })
           if (selectedFile.type === 'text/plain' || selectedFile.name.endsWith('.txt') || selectedFile.name.endsWith('.json')) {
             contentText = await selectedFile.text();
           }
-          
+
           // Simulated 1.5s delay to make it feel premium
           await new Promise(resolve => setTimeout(resolve, 1500));
           result = parseDocumentLocally(contentText, selectedFile.name);
@@ -182,7 +182,6 @@ export default function CarbonScannerCard({ id, inputs, onUpdateInputs, token })
       let habit = 'average';
       if (extractedValue < 100) habit = 'minimalist';
       else if (extractedValue > 300) habit = 'consumerist';
-      
       updatedInputs.shoppingHabit = habit;
       summaryMessage = `Shopping habit profile adjusted to ${habit} based on receipt value.`;
     }
@@ -347,7 +346,7 @@ export default function CarbonScannerCard({ id, inputs, onUpdateInputs, token })
 
             {/* Extracted Details & Footprint */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '12px' }}>
-              
+
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Extracted usage:</span>
                 {isEditing ? (
