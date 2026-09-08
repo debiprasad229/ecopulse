@@ -2,11 +2,11 @@ import { EcoPulseProvider, useEcoPulse } from './context/EcoPulseContext';
 import { Leaf, RefreshCw, BarChart3, CheckSquare, Globe, Menu } from 'lucide-react';
 import OnboardingWizard from './components/OnboardingWizard';
 import AccessibilitySettings from './components/AccessibilitySettings';
-import AuthPage from './components/AuthPage';
 import Navbar from './components/Navbar';
 import NotificationBell from './components/NotificationBell';
 
 // Page Components
+import AuthPage from './pages/AuthPage';
 import Dashboard from './pages/Dashboard';
 import Analytics from './pages/Analytics';
 import AICoach from './pages/AICoach';
