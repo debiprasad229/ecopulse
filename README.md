@@ -171,6 +171,22 @@ gcloud run deploy ecopulse \
 
 **Live Demo:** [https://ecopulse-ee0s.onrender.com](https://ecopulse-ee0s.onrender.com)
 
+## 🛡️ Demo Account (Privacy-First Exploration)
+
+For users, evaluators, and testers who **do not wish to share their personal information**, a pre-configured demo account is seeded automatically:
+
+| Attribute | Value |
+|---|---|
+| **Email ID** | `demo@ecopulse.app` |
+| **Password** | `EcoDemo123!` |
+
+### Features of the Demo Account:
+* **Zero Personal Information Required**: Explore all platform features without inputting your real name, email, or credentials.
+* **Instant One-Click Login**: Simply click the **"One-Click Demo Login"** button on the Auth screen to authenticate immediately.
+* **Auto-Fill Convenience**: Use the **"Auto-fill"** button to load the credentials into the sign-in form.
+* **Pre-Loaded Realistic Telemetry**: Ships with rich baseline carbon footprint calculations, historical emission trend charts, active daily habits, earned badges, challenges, and sample AI Coach conversations ready for immediate exploration.
+* **Tamper Protection**: Password resets are disabled on the demo account to prevent accidental lockout for other evaluators.
+
 ## 🔒 Security Features
 * **Authentication & Authorization**: Password hashing using `bcryptjs` and user session tokens signed with `jsonwebtoken` (JWT).
 * **Protected Routes**: Middleware verifies authentication tokens on all user-specific profile, habit, and chat routes.

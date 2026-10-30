@@ -1,10 +1,16 @@
-import { useState } from 'react';
-import { Leaf, Mail, Lock, User, Key, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Leaf, Mail, Lock, User, Key, Eye, EyeOff, ArrowRight, ShieldCheck, Sparkles, Copy, Check } from 'lucide-react';
 
 export default function AuthPage({ onAuthSuccess }) {
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'signup'
   const [showPassword, setShowPassword] = useState(false);
   
+  // Demo Account credentials state
+  const [demoEmail, setDemoEmail] = useState('demo@ecopulse.app');
+  const [demoPassword, setDemoPassword] = useState('EcoDemo123!');
+  const [demoLoading, setDemoLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
+
   // Form fields
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -24,7 +30,71 @@ export default function AuthPage({ onAuthSuccess }) {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
+  // Fetch configured demo credentials if provided by backend
+  useEffect(() => {
+    let isMounted = true;
+    fetch('/api/auth/demo-credentials')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && isMounted) {
+          if (data.email) setDemoEmail(data.email);
+          if (data.password) setDemoPassword(data.password);
+        }
+      })
+      .catch(() => {
+        // Fallback to static defaults
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
+
+  const handleInstantDemoLogin = async () => {
+    setError('');
+    setMessage('');
+    setDemoLoading(true);
+
+    try {
+      let res = await fetch('/api/auth/demo-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      // Fallback to standard login endpoint if demo-login is unavailable
+      if (!res.ok) {
+        res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: demoEmail, password: demoPassword })
+        });
+      }
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Demo login failed. Please try again.');
+      }
+
+      onAuthSuccess(data.token, data.user);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setDemoLoading(false);
+    }
+  };
+
+  const handleFillDemoCredentials = () => {
+    setIsForgotPassword(false);
+    setActiveTab('login');
+    setEmail(demoEmail);
+    setPassword(demoPassword);
+    setError('');
+    setCopied(true);
+    setMessage('Demo credentials loaded! Click "Log In" to access EcoPulse.');
+    setTimeout(() => setCopied(false), 2500);
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -412,6 +482,63 @@ export default function AuthPage({ onAuthSuccess }) {
         ) : (
           /* STANDARD LOGIN / SIGNUP TABS */
           <>
+            {/* Privacy-First Demo Access Banner */}
+            <div className="demo-access-banner" data-testid="demo-access-banner">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <ShieldCheck size={18} style={{ color: 'var(--accent-green)' }} />
+                <span style={{ fontSize: '0.88rem', fontWeight: '700', color: 'var(--text-primary)' }}>
+                  Privacy-First Demo Access
+                </span>
+              </div>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: '1.4', margin: '4px 0 10px' }}>
+                Don't want to share personal information? Explore the entire platform instantly using the demo credentials below:
+              </p>
+
+              <div className="demo-credentials-box">
+                <div className="demo-credential-row">
+                  <span style={{ color: 'var(--text-muted)' }}>Email ID:</span>
+                  <code data-testid="demo-email-display">{demoEmail}</code>
+                </div>
+                <div className="demo-credential-row">
+                  <span style={{ color: 'var(--text-muted)' }}>Password:</span>
+                  <code data-testid="demo-password-display">{demoPassword}</code>
+                </div>
+              </div>
+
+              <div className="demo-actions">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  style={{ flex: 1, height: '38px', fontSize: '0.8rem', padding: '0 12px', justifyContent: 'center', gap: '6px' }}
+                  onClick={handleInstantDemoLogin}
+                  disabled={loading || demoLoading}
+                  data-testid="demo-login-btn"
+                >
+                  <Sparkles size={14} />
+                  {demoLoading ? 'Logging into Demo...' : 'One-Click Demo Login'}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  style={{ height: '38px', fontSize: '0.8rem', padding: '0 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                  onClick={handleFillDemoCredentials}
+                  title="Auto-fill demo credentials into login fields"
+                  data-testid="demo-autofill-btn"
+                >
+                  {copied ? <Check size={14} style={{ color: 'var(--accent-green)' }} /> : <Copy size={14} />}
+                  {copied ? 'Filled!' : 'Try Demo'}
+                </button>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '14px 0 18px' }}>
+              <div style={{ flex: 1, height: '1px', background: 'var(--card-border)' }}></div>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Or use personal credentials
+              </span>
+              <div style={{ flex: 1, height: '1px', background: 'var(--card-border)' }}></div>
+            </div>
+
             <div style={{
               display: 'flex',
               background: 'rgba(255, 255, 255, 0.02)',
@@ -521,15 +648,42 @@ export default function AuthPage({ onAuthSuccess }) {
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  style={{ width: '100%', justifyContent: 'center', height: '46px', marginTop: '10px' }}
-                  disabled={loading}
-                >
-                  {loading ? 'Logging in...' : 'Sign In'}
-                  <ArrowRight size={16} />
-                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    style={{ width: '100%', justifyContent: 'center', height: '46px' }}
+                    disabled={loading}
+                    data-testid="login-submit-btn"
+                  >
+                    {loading ? 'Logging in...' : 'Log In'}
+                    <ArrowRight size={16} />
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    style={{
+                      width: '100%',
+                      justifyContent: 'center',
+                      height: '42px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      background: 'rgba(16, 185, 129, 0.08)',
+                      border: '1px solid rgba(16, 185, 129, 0.3)',
+                      color: 'var(--accent-green)',
+                      fontWeight: '600',
+                      fontSize: '0.85rem'
+                    }}
+                    onClick={handleFillDemoCredentials}
+                    data-testid="try-demo-btn"
+                    title="Populate login form with demo credentials"
+                  >
+                    <Sparkles size={16} />
+                    {copied ? 'Credentials Filled!' : 'Try Demo (Fill Credentials)'}
+                  </button>
+                </div>
               </form>
             ) : (
               /* SIGNUP FORM */

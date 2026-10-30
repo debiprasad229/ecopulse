@@ -1,13 +1,66 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
 import { transporter, isSmtpConfigured } from '../config/email.js';
 import { forgotPasswordLimiter } from '../middleware/rateLimiters.js';
+import {
+  DEMO_USER_EMAIL,
+  DEMO_USER_PASSWORD,
+  getDemoCredentials
+} from '../config/seedDemoUser.js';
+import { userStore, isMongoConnected } from '../services/userStore.js';
 
 const router = express.Router();
 
-// Sign Up Route
+// Helper: check if an email matches the demo account
+const isDemoEmail = (email) => {
+  if (!email) return false;
+  const normalized = email.trim().toLowerCase();
+  return (
+    normalized === DEMO_USER_EMAIL.toLowerCase() ||
+    normalized === 'demo@ecopulse.app' ||
+    normalized.startsWith('demo@')
+  );
+};
+
+// Helper: build a JWT + user response for the demo account
+const buildDemoResponse = (demoUser) => {
+  const JWT_SECRET = process.env.JWT_SECRET;
+  const userId = demoUser._id || demoUser.id;
+  const token = jwt.sign(
+    { id: userId, email: demoUser.email, isDemo: true },
+    JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+  return {
+    token,
+    user: {
+      id: userId,
+      name: demoUser.name,
+      email: demoUser.email
+    }
+  };
+};
+
+// Retrieve Demo Credentials
+router.get('/demo-credentials', (req, res) => {
+  res.json(getDemoCredentials());
+});
+
+// One-Click Demo Login Route
+router.post('/demo-login', async (req, res) => {
+  try {
+    const demoUser = await userStore.getDemoUser();
+    console.log(`[Auth] Demo user logged in via /demo-login (${demoUser.email})`);
+    res.json(buildDemoResponse(demoUser));
+  } catch (error) {
+    console.error('Demo Login Error:', error.message || error);
+    const fallback = await userStore.getDemoUser();
+    res.json(buildDemoResponse(fallback));
+  }
+});
+
+// Sign Up Route (Anyone in the world can create their own account)
 router.post('/signup', async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -16,7 +69,11 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ error: 'Name, email, and password are required.' });
     }
 
-    const existingUser = await User.findOne({ email });
+    if (isDemoEmail(email)) {
+      return res.status(400).json({ error: 'This email is reserved for demo access. Please use the demo credentials to log in.' });
+    }
+
+    const existingUser = await userStore.findByEmail(email);
     if (existingUser) {
       return res.status(400).json({ error: 'An account with this email address already exists.' });
     }
@@ -25,22 +82,23 @@ router.post('/signup', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const newUser = new User({
+    const newUser = await userStore.createUser({
       name,
       email,
       password: hashedPassword,
       isNewUser: true
     });
 
-    await newUser.save();
-
     const JWT_SECRET = process.env.JWT_SECRET;
-    const token = jwt.sign({ id: newUser._id, email: newUser.email }, JWT_SECRET, { expiresIn: '7d' });
+    const userId = newUser._id || newUser.id;
+    const token = jwt.sign({ id: userId, email: newUser.email }, JWT_SECRET, { expiresIn: '7d' });
+
+    console.log(`[Auth] New account registered successfully: ${newUser.email}`);
 
     res.status(201).json({
       token,
       user: {
-        id: newUser._id,
+        id: userId,
         name: newUser.name,
         email: newUser.email
       }
@@ -51,7 +109,7 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-// Login Route
+// Login Route (Login with created credentials or demo credentials)
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -60,7 +118,19 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required.' });
     }
 
-    const user = await User.findOne({ email });
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Fast-path: demo account login
+    if (isDemoEmail(normalizedEmail)) {
+      const isCorrectPassword = password === DEMO_USER_PASSWORD || password === 'EcoDemo123!';
+      if (isCorrectPassword || !isMongoConnected()) {
+        const demoUser = await userStore.getDemoUser();
+        console.log(`[Auth] Demo account authenticated via /login: ${normalizedEmail}`);
+        return res.json(buildDemoResponse(demoUser));
+      }
+    }
+
+    const user = await userStore.findByEmail(normalizedEmail);
     if (!user) {
       return res.status(400).json({ error: 'Invalid email or password.' });
     }
@@ -71,12 +141,15 @@ router.post('/login', async (req, res) => {
     }
 
     const JWT_SECRET = process.env.JWT_SECRET;
-    const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    const userId = user._id || user.id;
+    const token = jwt.sign({ id: userId, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+
+    console.log(`[Auth] User authenticated successfully: ${user.email}`);
 
     res.json({
       token,
       user: {
-        id: user._id,
+        id: userId,
         name: user.name,
         email: user.email
       }
@@ -95,17 +168,21 @@ router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
       return res.status(400).json({ error: 'Email is required.' });
     }
 
-    const user = await User.findOne({ email });
+    if (isDemoEmail(email)) {
+      return res.status(400).json({ error: 'The demo account password is static and cannot be reset. Please log in directly using the demo credentials.' });
+    }
+
+    const user = await userStore.findByEmail(email);
     if (!user) {
       return res.status(404).json({ error: 'An account with this email address does not exist.' });
     }
 
     // Generate a 6-digit verification code
     const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
-    user.resetPasswordToken = resetCode;
-    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-
-    await user.save();
+    await userStore.updateUser(user._id || user.id || email, {
+      resetPasswordToken: resetCode,
+      resetPasswordExpires: Date.now() + 3600000
+    });
 
     const logCodeToConsole = () => {
       console.log('\n==================================================');
@@ -164,13 +241,8 @@ router.post('/verify-code', async (req, res) => {
       return res.status(400).json({ error: 'Email and verification code are required.' });
     }
 
-    const user = await User.findOne({
-      email,
-      resetPasswordToken: token,
-      resetPasswordExpires: { $gt: Date.now() }
-    });
-
-    if (!user) {
+    const user = await userStore.findByEmail(email);
+    if (!user || user.resetPasswordToken !== token || !user.resetPasswordExpires || user.resetPasswordExpires <= Date.now()) {
       return res.status(400).json({ error: 'Invalid or expired verification code.' });
     }
 
@@ -189,24 +261,23 @@ router.post('/reset-password', async (req, res) => {
       return res.status(400).json({ error: 'Email, reset code, and new password are required.' });
     }
 
-    const user = await User.findOne({
-      email,
-      resetPasswordToken: token,
-      resetPasswordExpires: { $gt: Date.now() }
-    });
+    if (isDemoEmail(email)) {
+      return res.status(400).json({ error: 'The demo account password is static and cannot be reset. Please log in directly using the demo credentials.' });
+    }
 
-    if (!user) {
+    const user = await userStore.findByEmail(email);
+    if (!user || user.resetPasswordToken !== token || !user.resetPasswordExpires || user.resetPasswordExpires <= Date.now()) {
       return res.status(400).json({ error: 'Invalid or expired password reset code.' });
     }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    user.password = hashedPassword;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpires = undefined;
-
-    await user.save();
+    await userStore.updateUser(user._id || user.id || email, {
+      password: hashedPassword,
+      resetPasswordToken: undefined,
+      resetPasswordExpires: undefined
+    });
 
     res.json({ message: 'Password has been reset successfully. You can now log in.' });
   } catch (error) {
